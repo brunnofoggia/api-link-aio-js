@@ -3,6 +3,7 @@ import { HttpStatusCode } from 'axios';
 import { ObjectLiteral } from './common/types/objectLiteral';
 import { RequestConfigInternalAuth } from './interfaces/requestConfig.interface';
 import { PublicApi } from './publicApi';
+import { defaults, omit } from 'lodash';
 
 export abstract class AuthApi extends PublicApi {
     authMethod: string = 'post';
@@ -35,7 +36,7 @@ export abstract class AuthApi extends PublicApi {
         const options: any = this.authReqOptionsDefault();
 
         this._setReqOptions(options, 'data', this.authReqOptionBody())
-            ._setReqOptions(options, 'headers', this.authReqOptionHeaders())
+            ._setReqOptions(options, 'headers', omit(this.authReqOptionHeaders(), 'Authorization'))
             ._setReqOptions(options, 'auth', this.authReqOptionAuth());
 
         return options;
@@ -53,6 +54,8 @@ export abstract class AuthApi extends PublicApi {
         const options = this.authBuildReqOptions();
         const response = await super._request(options);
         this.debug('authenticated', this.authResHandle(response));
+
+        return { options, isAuthenticated: this._isAuthenticated() };
     }
 
     _isAuthorizing(options) {

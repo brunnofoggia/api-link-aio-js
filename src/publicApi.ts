@@ -92,10 +92,6 @@ export abstract class PublicApi extends RestfulMethods {
         return { internal, external };
     }
 
-    _stripInternal(obj: ObjectLiteral = {}) {
-        return omitBy(obj, (value: any, key: string) => key.startsWith('__'));
-    }
-
     _setDefaultConfig() {
         this._setDefaultInternalConfig();
         this._defaultConfig = defaultsDeep({}, this._getDefaultInternalConfig(), this._getDefaultConfig);
@@ -161,8 +157,12 @@ export abstract class PublicApi extends RestfulMethods {
     }
 
     async _retryCheck(error, retry: number) {
-        const shouldTryAgain = error.code === 'ECONNREFUSED' && retry > 0;
+        const shouldTryAgain = this.retryCheckError(error, retry) && retry > 0;
         return { shouldTryAgain, retry };
+    }
+
+    async retryCheckError(error, retry: number) {
+        return error.code === 'ECONNREFUSED';
     }
 
     async _dispatchRequestError(error: any, options: AxiosRequestConfig) {

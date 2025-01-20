@@ -81,4 +81,4 @@ export const deleteResponse = {
 
 export const uninitializedServerReject = { code: 'ECONNREFUSED' };
 
-export const badRequestServerReject = { code: 'ERR_BAD_RESPONSE' };
+export const badRequestServerReject = { code: 'ERR_BAD_REQUEST' };

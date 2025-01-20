@@ -91,6 +91,7 @@ describe('Api Provider', () => {
             const error = new Error('');
             error['code'] = badRequestServerReject.code;
 
+            // will retry 2 times, so once should be a problem in the future
             jest.spyOn(apiProvider, '_request').mockImplementationOnce(() => {
                 ++c;
                 throw error;

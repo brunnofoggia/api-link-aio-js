@@ -24,9 +24,20 @@ describe('Bearer Api Provider', () => {
 
     describe('authentication', () => {
         it('should authenticate', async () => {
-            expect.assertions(3);
+            expect.assertions(4);
             expect(apiProvider._isAuthenticated()).toBe(false);
-            await apiProvider.auth();
+            const { options } = await apiProvider.auth();
+
+            expect(options?.headers?.Authorization).toBeFalsy();
+            expect(apiProvider._isAuthenticated()).toBe(true);
+            expect(apiProvider.token).toBe(getDateTimeToken());
+        });
+
+        it('should authenticate again', async () => {
+            expect.assertions(3);
+            const { options } = await apiProvider.auth();
+
+            expect(options?.headers?.Authorization).toBeFalsy();
             expect(apiProvider._isAuthenticated()).toBe(true);
             expect(apiProvider.token).toBe(getDateTimeToken());
         });
