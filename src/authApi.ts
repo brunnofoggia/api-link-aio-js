@@ -9,8 +9,8 @@ export abstract class AuthApi extends PublicApi {
     authMethod: string = 'post';
     username: string;
     password: string;
+    authPath: string;
 
-    abstract authPath: string;
     abstract authResHandle(response): any;
     abstract _isAuthenticated(): boolean;
 

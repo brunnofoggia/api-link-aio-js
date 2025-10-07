@@ -2,9 +2,10 @@ import '@test/common/jest.test';
 import _debug from 'debug';
 const debug = _debug('test:class:api');
 
-import { closeServer } from '@test/publicApi.test';
+import { closeServer, breatheMs } from '@test/publicApi.test';
 import { CreateApiServer, SomeMasterKeyIntegration, getResponse } from '@test/masterKeyIntegration.test';
 import { getToken } from '@test/masterKeyApi.test';
+import { sleep } from './common/utils/sleep';
 
 let apiProvider: SomeMasterKeyIntegration, server;
 describe('MasterKey Api Provider', () => {
@@ -13,6 +14,7 @@ describe('MasterKey Api Provider', () => {
     });
 
     beforeEach(async () => {
+        await sleep(breatheMs); // let the server breathe a bit
         apiProvider = new SomeMasterKeyIntegration();
         await apiProvider.initialize();
         // apiProvider.debug(debug);

@@ -57,3 +57,5 @@ export const closeServer = (server) => {
         });
     });
 };
+
+export const breatheMs = 10;

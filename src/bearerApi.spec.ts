@@ -3,8 +3,9 @@ import _debug from 'debug';
 const debug = _debug('test:class:api');
 
 import { CreateApiServer, SomeBearerIntegration, getResponse } from '@test/bearerApiIntegration.test';
-import { closeServer } from '@test/publicApi.test';
+import { closeServer, breatheMs } from '@test/publicApi.test';
 import { getDateTimeToken } from '@test/bearerApi.test';
+import { sleep } from './common/utils/sleep';
 
 let apiProvider: SomeBearerIntegration, server;
 describe('Bearer Api Provider', () => {
@@ -13,6 +14,7 @@ describe('Bearer Api Provider', () => {
     });
 
     beforeEach(async () => {
+        await sleep(breatheMs); // let the server breathe a bit
         apiProvider = new SomeBearerIntegration();
         await apiProvider.initialize();
         // apiProvider.debug(debug);

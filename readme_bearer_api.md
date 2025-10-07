@@ -36,7 +36,7 @@ export class TestIntegration extends BearerApi {
         // 3. com base em valores de ambiente
         this.baseUrl = 'https://api.restful-api.dev';
         this.authPath = '/auth';
-        this.responseTokenField = 'data.token';
+        this.authResTokenField = 'data.token';
         this.username = 'user';
         this.password = 'pass';
     }

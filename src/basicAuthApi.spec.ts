@@ -2,9 +2,10 @@ import '@test/common/jest.test';
 import _debug from 'debug';
 const debug = _debug('test:class:api');
 
-import { closeServer } from '@test/publicApi.test';
+import { closeServer, breatheMs } from '@test/publicApi.test';
 import { CreateApiServer, SomeBasicAuthIntegration, getResponse } from '@test/basicAuthIntegration.test';
 import { getToken } from '@test/masterKeyApi.test';
+import { sleep } from './common/utils/sleep';
 
 let apiProvider: SomeBasicAuthIntegration, server;
 describe('Basic Auth Api Provider', () => {
@@ -13,6 +14,7 @@ describe('Basic Auth Api Provider', () => {
     });
 
     beforeEach(async () => {
+        await sleep(breatheMs); // let the server breathe a bit
         apiProvider = new SomeBasicAuthIntegration();
         await apiProvider.initialize();
         // apiProvider.debug(debug);

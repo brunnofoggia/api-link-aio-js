@@ -14,12 +14,12 @@ export abstract class PublicApi extends RestfulMethods {
     baseUrl: string = '';
 
     debug = debugInjection;
-    _defaultConfig: ObjectLiteral;
-    _defaultInternalConfig: ObjectLiteral = {
+    _defaultConfig: any;
+    _defaultInternalConfig: any = {
         __retry: 3,
         __retryTimer: 1000,
     };
-    _defaultHeaders: ObjectLiteral = {
+    _defaultHeaders: any = {
         'Content-Type': 'application/json',
     };
 

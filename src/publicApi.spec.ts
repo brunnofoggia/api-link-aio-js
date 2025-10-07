@@ -15,8 +15,8 @@ import {
     deleteHeaders,
     badRequestServerReject,
 } from '@test/publicIntegration.test';
-import { closeServer } from '@test/publicApi.test';
-import { Err } from 'common/utils/error';
+import { closeServer, breatheMs } from '@test/publicApi.test';
+import { sleep } from './common/utils/sleep';
 
 let apiProvider, server;
 describe('Api Provider', () => {
@@ -25,6 +25,7 @@ describe('Api Provider', () => {
     });
 
     beforeEach(async () => {
+        await sleep(breatheMs); // let the server breathe a bit
         apiProvider = new SomeIntegration();
         await apiProvider.initialize();
     });
