@@ -35,6 +35,10 @@ export abstract class PublicApi extends RestfulMethods {
         const options = this._prepareOptions(options_);
         const config = this._prepareConfig(config_);
 
+        return await this._http(options);
+    }
+
+    async _http(options) {
         return await axios(options);
     }
 

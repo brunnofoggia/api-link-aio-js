@@ -55,7 +55,7 @@ export abstract class AuthApi extends PublicApi {
         const response = await this._request(options);
         this.debug('authenticated', this.authResHandle(response));
 
-        return { options, isAuthenticated: this._isAuthenticated() };
+        return { options, isAuthenticated: this._isAuthenticated(), response };
     }
 
     _isAuthorizing(options) {

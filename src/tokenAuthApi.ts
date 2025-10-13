@@ -1,8 +1,10 @@
 import { defaultsDeep, get } from 'lodash';
+import { AxiosResponse } from 'axios';
 
+import { Err } from './common/utils/error';
 import { ObjectLiteral } from './common/types/objectLiteral';
 import { AuthApi } from './authApi';
-import { AxiosResponse } from 'axios';
+import { ERROR_CODE } from './enum/error';
 
 export abstract class TokenAuthApi extends AuthApi {
     abstract authHeaderPrefix: string;
@@ -12,6 +14,14 @@ export abstract class TokenAuthApi extends AuthApi {
 
     _isAuthenticated() {
         return !!this.token;
+    }
+
+    setToken(token: string) {
+        this.token = token;
+    }
+
+    clearToken() {
+        this.token = '';
     }
 
     _getDefaultHeaders() {
@@ -29,7 +39,13 @@ export abstract class TokenAuthApi extends AuthApi {
     }
 
     authResHandle(response: AxiosResponse) {
-        return (this.token = this.getTokenFromResponse(response));
+        const token = this.getTokenFromResponse(response);
+        this.setToken(token);
+
+        if (!this.token) {
+            throw new Err('Failed to retrieve token from response', ERROR_CODE.TOKEN_MISSING);
+        }
+        return this.token;
     }
 
     getTokenFromResponse(response: AxiosResponse) {
