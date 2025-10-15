@@ -1,11 +1,16 @@
 import { indexOf } from 'lodash';
 import { ERROR_CODE, errorPrefix } from '../../enum/error';
 
-export type ERROR_CODE_TYPE = (typeof ERROR_CODE)[keyof typeof ERROR_CODE];
+export type ERROR_CODE_TYPE = number | string;
 
-export const buildErrorCode = (code: number | string) => {
-    if (typeof code === 'number' && indexOf(Object.values(ERROR_CODE), code) !== -1) {
-        return [errorPrefix, code].join('-');
+export const buildErrorCode = (code: ERROR_CODE_TYPE) => {
+    if ((typeof code !== 'number' && typeof code !== 'string') || code === '') {
+        code = ERROR_CODE.UNKNOWN;
+    }
+
+    const position = indexOf(Object.values(ERROR_CODE), code);
+    if (position !== -1 && position !== undefined) {
+        return [errorPrefix, code + ''].join('-');
     }
     return code + '';
 };
@@ -13,7 +18,7 @@ export const buildErrorCode = (code: number | string) => {
 export class Err extends Error {
     code: string;
     constructor(message: string, code: ERROR_CODE_TYPE = ERROR_CODE.UNKNOWN) {
-        super(message);
+        super(message + '');
         this.code = buildErrorCode(code);
     }
 }

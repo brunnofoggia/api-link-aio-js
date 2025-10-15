@@ -4,6 +4,7 @@ import { ObjectLiteral } from './common/types/objectLiteral';
 import { RequestConfigInternalAuth } from './interfaces/requestConfig.interface';
 import { PublicApi } from './publicApi';
 import { defaults, omit } from 'lodash';
+import { AuthOptions } from './interfaces/auth.interface';
 
 export abstract class AuthApi extends PublicApi {
     authMethod: string = 'post';
@@ -14,7 +15,7 @@ export abstract class AuthApi extends PublicApi {
     abstract authResHandle(response): any;
     abstract _isAuthenticated(): boolean;
 
-    authReqOptionBody(): any {}
+    authReqOptionBody(options: Partial<AuthOptions> = {}): any {}
     authReqOptionHeaders(): any {}
     authReqOptionAuth(): any {}
 
@@ -32,30 +33,30 @@ export abstract class AuthApi extends PublicApi {
         return this;
     }
 
-    authBuildReqOptions() {
-        const options: any = this.authReqOptionsDefault();
+    authBuildReqOptions(options: Partial<AuthOptions> = {}) {
+        const reqOptions: any = this.authReqOptionsDefault();
 
-        this._setReqOptions(options, 'data', this.authReqOptionBody())
-            ._setReqOptions(options, 'headers', omit(this.authReqOptionHeaders(), 'Authorization'))
-            ._setReqOptions(options, 'auth', this.authReqOptionAuth());
+        this._setReqOptions(reqOptions, 'data', this.authReqOptionBody(options))
+            ._setReqOptions(reqOptions, 'headers', omit(this.authReqOptionHeaders(), 'Authorization'))
+            ._setReqOptions(reqOptions, 'auth', this.authReqOptionAuth());
 
-        return options;
+        return reqOptions;
     }
 
-    authBuildBody() {
+    authBuildBody(options: Partial<AuthOptions> = {}) {
         return {
-            username: this._getUsername(),
-            password: this._getPassword(),
+            username: options.username || this._getUsername(),
+            password: options.password || this._getPassword(),
         };
     }
 
-    async auth() {
+    async auth(_options: Partial<AuthOptions> = {}) {
         this.debug('authenticating');
-        const options = this.authBuildReqOptions();
-        const response = await this._request(options);
+        const reqOptions = this.authBuildReqOptions(_options);
+        const response = await this._request(reqOptions);
         this.debug('authenticated', this.authResHandle(response));
 
-        return { options, isAuthenticated: this._isAuthenticated(), response };
+        return { options: reqOptions, isAuthenticated: this._isAuthenticated(), response };
     }
 
     _isAuthorizing(options) {

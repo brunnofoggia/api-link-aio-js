@@ -1,9 +1,10 @@
+import { AuthOptions } from './interfaces/auth.interface';
 import { TokenAuthApi } from './tokenAuthApi';
 
 export abstract class BearerApi extends TokenAuthApi {
     authHeaderPrefix = 'Bearer';
 
-    authReqOptionBody(): any {
-        return this.authBuildBody();
+    authReqOptionBody(reqOptions: Partial<AuthOptions> = {}): any {
+        return this.authBuildBody(reqOptions);
     }
 }

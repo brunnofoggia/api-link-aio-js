@@ -1,6 +1,6 @@
 {
     "name": "api-link-aio",
-    "version": "0.4.4",
+    "version": "0.4.6",
     "description": "",
     "license": "ISC",
     "author": "Bruno Foggia",
@@ -14,7 +14,8 @@
         "pre-commit": "lint-staged && yarn test",
         "prepare": "npm run build",
         "test": "DEBUG=test:*,app:* npm run test:run",
-        "test:run": "NODE_OPTIONS=--experimental-vm-modules npx jest --verbose --runInBand --detectOpenHandles"
+        "test:run": "NODE_OPTIONS=--experimental-vm-modules npx jest --verbose --runInBand --detectOpenHandles",
+        "coverage": "npx jest --coverage --runInBand"
     },
     "devDependencies": {
         "@commitlint/config-conventional": "^20.0.0",
