@@ -55,13 +55,29 @@ export abstract class PublicApi extends RestfulMethods {
         return options_;
     }
 
-    _prepareUrl(url_: string) {
-        if (/^http/.test(url_)) return url_;
+    _prepareUrl(urlPath: string) {
+        if (/^http/.test(urlPath)) return urlPath;
         else if (!this.baseUrl) throw new Err('base url not found for api request', ERROR_CODE.MISSING_BASE_URL);
 
-        const baseUrl = this.baseUrl.replace(/\/$/, '');
-        const url = url_.replace(/^\//, '');
-        return [baseUrl, url].join('/');
+        return this.buildRequestUrl(urlPath);
+    }
+
+    buildRequestUrl(urlPath: string) {
+        const baseUrl = this.prepareRequestBaseUrl(this.getRequestBasePath());
+        const finalPath = this.prepareRequestUrlPath(urlPath);
+        return [baseUrl, finalPath].join('/');
+    }
+
+    prepareRequestUrlPath(urlPath: string) {
+        return urlPath.replace(/^\//, '');
+    }
+
+    prepareRequestBaseUrl(baseUrl: string) {
+        return baseUrl.replace(/\/$/, '');
+    }
+
+    getRequestBasePath() {
+        return this.baseUrl;
     }
 
     _prepareConfig(config_: RequestConfigSplit | RequestConfigMixed = {}): RequestConfigSplit {
@@ -161,7 +177,8 @@ export abstract class PublicApi extends RestfulMethods {
     }
 
     async _retryCheck(error, retry: number) {
-        const shouldTryAgain = this.retryCheckError(error, retry) && retry > 0;
+        const isRetryable = await this.retryCheckError(error, retry);
+        const shouldTryAgain = isRetryable && retry > 0;
         return { shouldTryAgain, retry };
     }
 

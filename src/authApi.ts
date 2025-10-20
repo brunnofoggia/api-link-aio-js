@@ -64,7 +64,8 @@ export abstract class AuthApi extends PublicApi {
     }
 
     _isUnauthorizedError(error) {
-        return error?.response?.status === HttpStatusCode.Unauthorized;
+        const status = error?.response?.status;
+        return !!(status && status === HttpStatusCode.Unauthorized);
     }
 
     _getUsername() {
@@ -101,12 +102,17 @@ export abstract class AuthApi extends PublicApi {
 
     async _retryCheck(error, retry: number) {
         const isUnauthorized = this._isUnauthorizedError(error);
-        if (!isUnauthorized) retry++;
+        if (isUnauthorized) {
+            retry++;
+        }
 
-        const { shouldTryAgain } = await super._retryCheck(error, retry);
+        let { shouldTryAgain } = await super._retryCheck(error, retry);
 
         // re-authenticate
-        if (isUnauthorized && shouldTryAgain) await this.auth();
+        if (isUnauthorized && retry) {
+            await this.auth();
+            shouldTryAgain = true;
+        }
 
         return { shouldTryAgain, retry };
     }

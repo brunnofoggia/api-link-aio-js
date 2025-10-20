@@ -549,20 +549,20 @@ describe('AuthApi', () => {
             });
         });
 
-        it('deve incrementar retry para erro 400', async () => {
+        it('nao deve incrementar retry para erro 400', async () => {
             // jest.spyOn(Object.getPrototypeOf(Object.getPrototypeOf(authApi)), '_retryCheck').mockImplementation(authApi.superRetryCheckSpy);
             const error = { response: { status: HttpStatusCode.BadRequest } };
             const result = await authApi._retryCheck(error, 2);
 
-            expect(result).toEqual({ shouldTryAgain: true, retry: 3 });
+            expect(result).toEqual({ shouldTryAgain: false, retry: 2 });
         });
 
-        it('deve não incrementar retry para erro 401', async () => {
+        it('deve incrementar retry para erro 401', async () => {
             // jest.spyOn(Object.getPrototypeOf(Object.getPrototypeOf(authApi)), '_retryCheck').mockImplementation(authApi.superRetryCheckSpy);
             const error = { response: { status: HttpStatusCode.Unauthorized } };
             const result = await authApi._retryCheck(error, 2);
 
-            expect(result).toEqual({ shouldTryAgain: true, retry: 2 });
+            expect(result).toEqual({ shouldTryAgain: true, retry: 3 });
         });
 
         it('deve chamar auth para erro 401 quando shouldTryAgain é true', async () => {
@@ -577,10 +577,19 @@ describe('AuthApi', () => {
         it('deve tratar erro de conexao', async () => {
             const error = { message: 'Network error', code: 'ECONNREFUSED' };
 
-            const result = await authApi._retryCheck(error, 0);
+            const result = await authApi._retryCheck(error, 1);
 
             expect(authApi.auth).not.toHaveBeenCalled();
             expect(result).toEqual({ shouldTryAgain: true, retry: 1 });
+        });
+
+        it('deve tratar ignorar erro de conexao apos retry attempts are depleated', async () => {
+            const error = { message: 'Network error', code: 'ECONNREFUSED' };
+
+            const result = await authApi._retryCheck(error, 0);
+
+            expect(authApi.auth).not.toHaveBeenCalled();
+            expect(result).toEqual({ shouldTryAgain: false, retry: 0 });
         });
     });
 

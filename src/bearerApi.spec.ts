@@ -25,6 +25,18 @@ describe('Bearer Api Provider', () => {
     });
 
     describe('authentication', () => {
+        it('should obtain username and password for request body', async () => {
+            expect.assertions(1);
+            const username = 'user1';
+            const password = 'pass1';
+            apiProvider._setAuth(username, password);
+
+            expect(apiProvider.authReqOptionBody()).toStrictEqual({
+                username,
+                password,
+            });
+        });
+
         it('should authenticate', async () => {
             expect.assertions(4);
             expect(apiProvider._isAuthenticated()).toBe(false);
