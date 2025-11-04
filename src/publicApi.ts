@@ -152,10 +152,20 @@ export abstract class PublicApi extends RestfulMethods {
         return this._request(options, config);
     }
 
-    async _retryRequest(options_: AxiosRequestConfig = {}, config_: ObjectLiteral = {}, retry_ = undefined) {
+    defineInitialRetryValue(config: RequestConfigInternal = {}) {
+        const initialRetry = config.internal.__retry;
+        return initialRetry;
+    }
+
+    getRetryValue(config: RequestConfigInternal = {}, retry_ = undefined) {
+        const retry = retry_ === undefined ? this.defineInitialRetryValue(config) : retry_;
+        return retry;
+    }
+
+    async _retryRequest(options_: AxiosRequestConfig = {}, config_: RequestConfigInternal = {}, retry_ = undefined) {
         const options = this._prepareOptions(options_);
         const config = this._prepareConfig(config_);
-        const retry = retry_ === undefined ? config.internal.__retry : retry_;
+        const retry = this.getRetryValue(config, retry_);
 
         try {
             retry_ === undefined && this.debug('first try request', options.url);

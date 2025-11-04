@@ -4,7 +4,7 @@ import { TokenAuthApi } from './tokenAuthApi';
 import { PublicApi } from './publicApi';
 
 export abstract class MasterKeyApi extends PublicApi {
-    authHeaderPrefix = 'Token';
+    authHeaderPrefix = 'Master';
 
     _loggedHeaders() {
         return bind(BearerApi.prototype._loggedHeaders, this)();
