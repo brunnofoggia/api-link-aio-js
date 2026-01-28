@@ -6,10 +6,14 @@ import { ObjectLiteral } from './common/types/objectLiteral';
 import { AuthApi } from './authApi';
 import { ERROR_CODE } from './enum/error';
 
+export const TokenAuthDefaultOptions = {
+    authResTokenField: 'token',
+};
+
 export abstract class TokenAuthApi extends AuthApi {
     abstract authHeaderPrefix: string;
 
-    authResTokenField: string = 'token';
+    authResTokenField: string = TokenAuthDefaultOptions.authResTokenField;
     token: string = '';
 
     _isAuthenticated() {

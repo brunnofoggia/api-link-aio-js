@@ -1,8 +1,10 @@
+import '../test/common/jest.test';
+
 import { HttpStatusCode } from 'axios';
 import { AuthApi } from './authApi';
 import { ObjectLiteral } from './common/types/objectLiteral';
 import { RequestConfigInternalAuth } from './interfaces/requestConfig.interface';
-import { AuthOptions } from './interfaces/auth.interface';
+import { ERROR_CODE } from './enum/error';
 
 const originalAuthRequest = AuthApi.prototype.request;
 
@@ -14,6 +16,9 @@ jest.mock('lodash', () => ({
         const keysArray = Array.isArray(keys) ? keys : [keys];
         keysArray.forEach((key) => delete result[key]);
         return result;
+    }),
+    indexOf: jest.fn((array, value) => {
+        return array.indexOf(value);
     }),
 }));
 
@@ -94,8 +99,8 @@ describe('AuthApi', () => {
             expect(typeof authApi._isAuthenticated).toBe('function');
         });
 
-        it('deve ter métodos opcionais com implementação vazia', () => {
-            expect(authApi.authReqOptionBody()).toBeUndefined();
+        it('deve ter métodos opcionais com implementação vazia', async () => {
+            await expect(() => authApi.authReqOptionBody()).resolves.toBeUndefined();
             expect(authApi.authReqOptionHeaders()).toBeUndefined();
             expect(authApi.authReqOptionAuth()).toBeUndefined();
         });
@@ -173,13 +178,13 @@ describe('AuthApi', () => {
     describe('authBuildReqOptions', () => {
         beforeEach(() => {
             // Mock das funções de opções
-            jest.spyOn(authApi, 'authReqOptionBody').mockReturnValue({ username: 'user', password: 'pass' });
+            jest.spyOn(authApi, 'authReqOptionBody').mockResolvedValue({ username: 'user', password: 'pass' });
             jest.spyOn(authApi, 'authReqOptionHeaders').mockReturnValue({ 'Content-Type': 'application/json', Authorization: 'Bearer old-token' });
             jest.spyOn(authApi, 'authReqOptionAuth').mockReturnValue({ username: 'basic-user', password: 'basic-pass' });
         });
 
-        it('deve construir opções de request completas', () => {
-            const result = authApi.authBuildReqOptions();
+        it('deve construir opções de request completas', async () => {
+            const result = await authApi.authBuildReqOptions();
 
             expect(result).toEqual({
                 url: '/auth/login',
@@ -190,21 +195,20 @@ describe('AuthApi', () => {
             });
         });
 
-        it('deve remover header Authorization usando omit', () => {
+        it('deve remover header Authorization usando omit', async () => {
             const lodash = require('lodash');
 
-            authApi.authBuildReqOptions();
+            await authApi.authBuildReqOptions();
 
             expect(lodash.omit).toHaveBeenCalledWith({ 'Content-Type': 'application/json', Authorization: 'Bearer old-token' }, 'Authorization');
         });
 
-        it('deve retornar um objeto vazio quando métodos retornam undefined', () => {
-            jest.spyOn(authApi, 'authReqOptionBody').mockReturnValue(undefined);
+        it('deve retornar um objeto vazio quando métodos retornam undefined', async () => {
+            jest.spyOn(authApi, 'authReqOptionBody').mockResolvedValue(undefined);
             jest.spyOn(authApi, 'authReqOptionHeaders').mockReturnValue(undefined);
             jest.spyOn(authApi, 'authReqOptionAuth').mockReturnValue(undefined);
 
-            const result = authApi.authBuildReqOptions();
-
+            const result = await authApi.authBuildReqOptions();
             expect(result).toEqual({
                 headers: {},
                 url: '/auth/login',
@@ -212,10 +216,10 @@ describe('AuthApi', () => {
             });
         });
 
-        it('deve passar options para authReqOptionBody', () => {
+        it('deve passar options para authReqOptionBody', async () => {
             const options = { username: 'custom-user' };
 
-            authApi.authBuildReqOptions(options);
+            await authApi.authBuildReqOptions(options);
 
             expect(authApi.authReqOptionBody).toHaveBeenCalledWith(options);
         });
@@ -271,8 +275,14 @@ describe('AuthApi', () => {
     });
 
     describe('auth', () => {
+        it('deve falhar na ausencia de authPath', async () => {
+            authApi.authPath = '';
+
+            await expect(authApi.auth()).rejects.toThrowCode(ERROR_CODE.MISSING_AUTH_URL);
+        });
+
         it('deve executar fluxo de autenticação completo', async () => {
-            jest.spyOn(authApi, 'authBuildReqOptions').mockReturnValue({ url: '/auth/login', method: 'post' });
+            jest.spyOn(authApi, 'authBuildReqOptions').mockResolvedValue({ url: '/auth/login', method: 'post' });
             const mockResponse = { data: { token: 'new-token' } };
             authApi._requestSpy.mockResolvedValue(mockResponse);
             authApi.authResHandleSpy.mockReturnValue({ token: 'new-token' });
@@ -295,7 +305,7 @@ describe('AuthApi', () => {
 
         it('deve passar options para authBuildReqOptions', async () => {
             const options = { username: 'custom-user' };
-            jest.spyOn(authApi, 'authBuildReqOptions').mockReturnValue({ url: '/auth/login', method: 'post' });
+            jest.spyOn(authApi, 'authBuildReqOptions').mockResolvedValue({ url: '/auth/login', method: 'post' });
 
             await authApi.auth(options);
 
@@ -623,13 +633,12 @@ describe('AuthApi', () => {
             });
         });
 
-        it('deve permitir sobrescrita de métodos opcionais', () => {
-            authApi.authReqOptionBody = jest.fn().mockReturnValue({ custom: 'body' });
+        it('deve permitir sobrescrita de métodos opcionais', async () => {
+            authApi.authReqOptionBody = jest.fn().mockResolvedValue({ custom: 'body' });
             authApi.authReqOptionHeaders = jest.fn().mockReturnValue({ Custom: 'header' });
             authApi.authReqOptionAuth = jest.fn().mockReturnValue({ type: 'basic' });
 
-            const options = authApi.authBuildReqOptions();
-
+            const options = await authApi.authBuildReqOptions();
             expect(options.data).toEqual({ custom: 'body' });
             expect(options.headers).toEqual({ Custom: 'header' });
             expect(options.auth).toEqual({ type: 'basic' });

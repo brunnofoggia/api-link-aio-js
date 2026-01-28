@@ -1,4 +1,4 @@
-.env
+.env*
 .yarn-lock
 secret-baker-secrets.json
 
@@ -6,7 +6,7 @@ secret-baker-secrets.json
 /dist
 /lib
 /tmp
-/node_modules
+node_modules
 .yarn
 .serverless
 

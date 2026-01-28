@@ -17,6 +17,7 @@ import {
 } from '@test/publicIntegration.test';
 import { closeServer, breatheMs } from '@test/publicApi.test';
 import { sleep } from './common/utils/sleep';
+import { ERROR_CODE } from './enum/error';
 
 let apiProvider, server;
 describe('Api Provider', () => {
@@ -32,6 +33,35 @@ describe('Api Provider', () => {
 
     afterAll(async () => {
         await closeServer(server);
+    });
+
+    describe('initialization', () => {
+        it('should set initialized to true after initialize', async () => {
+            expect.assertions(2);
+            const newApiProvider = new SomeIntegration();
+            expect(newApiProvider._initialized).toBe(false);
+            await newApiProvider.initialize();
+            expect(newApiProvider._initialized).toBe(true);
+        });
+
+        it('should throw error if request is made before initialization', async () => {
+            expect.assertions(1);
+            const newApiProvider = new SomeIntegration();
+            newApiProvider._initialized = false;
+            await expect(newApiProvider._request({ url: 'test' })).rejects.toThrowCode(ERROR_CODE.NOT_INITIALIZED);
+        });
+
+        it('should not throw error if initialized without options', async () => {
+            expect.assertions(1);
+            const newApiProvider = new SomeIntegration();
+            await expect(newApiProvider.initialize()).resolves.toBeUndefined();
+        });
+
+        it('should throw error if initialized with not an object', async () => {
+            expect.assertions(1);
+            const newApiProvider = new SomeIntegration();
+            await expect(newApiProvider.initialize(true)).rejects.toThrowCode(ERROR_CODE.INVALID_INITIALIZE_OPTIONS);
+        });
     });
 
     describe('prepare url', () => {

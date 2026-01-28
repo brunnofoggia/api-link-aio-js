@@ -31,7 +31,7 @@ describe('Bearer Api Provider', () => {
             const password = 'pass1';
             apiProvider._setAuth(username, password);
 
-            expect(apiProvider.authReqOptionBody()).toStrictEqual({
+            await expect(() => apiProvider.authReqOptionBody()).resolves.toStrictEqual({
                 username,
                 password,
             });

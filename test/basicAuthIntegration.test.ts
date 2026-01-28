@@ -1,6 +1,3 @@
-import { AxiosResponse } from 'axios';
-
-import { BearerApi } from '../src/bearerApi';
 import { BasicAuthTokenApi } from '../src/basicAuthTokenApi';
 import { createApp, setRoutes } from './basicAuthApi.test';
 import { createServer } from './publicApi.test';

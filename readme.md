@@ -55,4 +55,6 @@ import { PublicApi, BearerApi, BasicAuthTokenApi } from 'api-link-aio';
 
 - Para uma API autenticada por Bearer Token: [Bearer Api](readme_bearer_api.md)
 
+- Para uma API autenticada por OAuth 2.0: [OAuth 2.0 Api](readme_oauth2_api.md)
+
 - Para uma API com "basic auth": [Basic Auth Token Api](readme_basic_auth_token_api.md)

@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { defaultsDeep, forEach, omitBy, size } from 'lodash';
+import { defaultsDeep, forEach, isPlainObject, size } from 'lodash';
 
 import { Err } from './common/utils/error';
 import { sleep } from './common/utils/sleep';
@@ -24,9 +24,19 @@ export abstract class PublicApi extends RestfulMethods {
     };
 
     async initialize(...args) {
+        await this.prepareInitializeOptions(args);
+        this._initialized = true;
+    }
+
+    async prepareInitializeOptions(args: any[]): Promise<any> {
+        const options = (args[0] || {}) as any;
+        if (!isPlainObject(options)) {
+            throw new Err('initialize options must be an object', ERROR_CODE.INVALID_INITIALIZE_OPTIONS);
+        }
+
         await this._setDefaultHeaders();
         await this._setDefaultConfig();
-        this._initialized = true;
+        return options;
     }
 
     async _request(options_: AxiosRequestConfig = {}, config_: RequestConfigSplit | RequestConfigMixed = {}): Promise<AxiosResponse> {

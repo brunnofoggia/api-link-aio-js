@@ -3,8 +3,10 @@ import { HttpStatusCode } from 'axios';
 import { ObjectLiteral } from './common/types/objectLiteral';
 import { RequestConfigInternalAuth } from './interfaces/requestConfig.interface';
 import { PublicApi } from './publicApi';
-import { defaults, omit } from 'lodash';
+import { omit } from 'lodash';
 import { AuthOptions } from './interfaces/auth.interface';
+import { Err } from './common/utils/error';
+import { ERROR_CODE } from './enum/error';
 
 export abstract class AuthApi extends PublicApi {
     authMethod: string = 'post';
@@ -15,7 +17,7 @@ export abstract class AuthApi extends PublicApi {
     abstract authResHandle(response): any;
     abstract _isAuthenticated(): boolean;
 
-    authReqOptionBody(options: Partial<AuthOptions> = {}): any {}
+    async authReqOptionBody(options: Partial<AuthOptions> = {}): Promise<any> {}
     authReqOptionHeaders(): any {}
     authReqOptionAuth(): any {}
 
@@ -33,16 +35,17 @@ export abstract class AuthApi extends PublicApi {
         return this;
     }
 
-    authBuildReqOptions(options: Partial<AuthOptions> = {}) {
+    async authBuildReqOptions(options: Partial<AuthOptions> = {}) {
         const reqOptions: any = this.authReqOptionsDefault();
 
-        this._setReqOptions(reqOptions, 'data', this.authReqOptionBody(options))
+        this._setReqOptions(reqOptions, 'data', await this.authReqOptionBody(options))
             ._setReqOptions(reqOptions, 'headers', omit(this.authReqOptionHeaders(), 'Authorization'))
             ._setReqOptions(reqOptions, 'auth', this.authReqOptionAuth());
 
         return reqOptions;
     }
 
+    // generic builder. will be used into authReqOptionsBody of subclasses, for example.
     authBuildBody(options: Partial<AuthOptions> = {}) {
         return {
             username: options.username || this._getUsername(),
@@ -52,7 +55,11 @@ export abstract class AuthApi extends PublicApi {
 
     async auth(_options: Partial<AuthOptions> = {}) {
         this.debug('authenticating');
-        const reqOptions = this.authBuildReqOptions(_options);
+        if (!this.authPath) {
+            throw new Err('authPath is required', ERROR_CODE.MISSING_AUTH_URL);
+        }
+
+        const reqOptions = await this.authBuildReqOptions(_options);
         const response = await this._request(reqOptions);
         this.debug('authenticated', this.authResHandle(response));
 

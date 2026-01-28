@@ -1,6 +1,3 @@
-import { AxiosResponse } from 'axios';
-
-import { BearerApi } from '../src/bearerApi';
 import { createApp, createServer } from './publicApi.test';
 import { setRoutes } from './masterKeyApi.test';
 import { MasterKeyApi } from '../src/masterKeyApi';

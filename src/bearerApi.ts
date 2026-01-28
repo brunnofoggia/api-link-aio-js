@@ -4,7 +4,7 @@ import { TokenAuthApi } from './tokenAuthApi';
 export abstract class BearerApi extends TokenAuthApi {
     authHeaderPrefix = 'Bearer';
 
-    authReqOptionBody(reqOptions: Partial<AuthOptions> = {}): any {
+    async authReqOptionBody(reqOptions: Partial<AuthOptions> = {}): Promise<any> {
         return this.authBuildBody(reqOptions);
     }
 }

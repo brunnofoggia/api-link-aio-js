@@ -11,7 +11,7 @@ declare global {
 const matchers = {
     toThrowCode: async function (received: () => void, expectedCode_: number | string) {
         try {
-            if (typeof received === 'function') received();
+            if (typeof received === 'function') await received();
             // common behavior like .toThrow()
             else throw received;
 

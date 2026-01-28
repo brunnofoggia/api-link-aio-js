@@ -1,0 +1,44 @@
+services:
+    oauth-test-api-assertion:
+        build: .
+        container_name: oauth-test-api-assertion
+        ports:
+            - '8080:8080'
+        environment:
+            PORT: '8080'
+
+            CLIENT_ID: 'test-client'
+            OAUTH_CLIENT_AUTH_MODE: 'private_key_jwt'
+            TOKEN_ENDPOINT_AUDIENCE: 'http://localhost:8080/auth'
+            CLIENT_ASSERTION_TTL_SECONDS: '120'
+            JWT_ISSUER: 'oauth-test-api'
+            JWT_AUDIENCE: 'your-app'
+            TOKEN_TTL_SECONDS: '3600'
+
+            CLIENT_PUBLIC_KEY_PATH: '/keys/client_public.pem'
+            SERVER_PRIVATE_KEY_PATH: '/keys/server_private.pem'
+            SERVER_PUBLIC_KEY_PATH: '/keys/server_public.pem'
+        volumes:
+            - ./../../../tmp/keys:/keys:ro
+
+    oauth-test-api-secret:
+        build: .
+        container_name: oauth-test-api-secret
+        ports:
+            - '8081:8081'
+        environment:
+            PORT: '8081'
+
+            CLIENT_ID: 'test-client'
+            CLIENT_SECRET: 'test-secret'
+            OAUTH_CLIENT_AUTH_MODE: 'client_secret'
+
+            JWT_ISSUER: 'oauth-test-api'
+            JWT_AUDIENCE: 'your-app'
+            TOKEN_TTL_SECONDS: '3600'
+
+            CLIENT_PUBLIC_KEY_PATH: '/keys/client_public.pem'
+            SERVER_PRIVATE_KEY_PATH: '/keys/server_private.pem'
+            SERVER_PUBLIC_KEY_PATH: '/keys/server_public.pem'
+        volumes:
+            - ./../../../tmp/keys:/keys:ro
